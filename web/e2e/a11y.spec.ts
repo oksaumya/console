@@ -39,12 +39,11 @@ test.describe('Accessibility Audits', () => {
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
           .disableRules([
-            'color-contrast',
-            'button-name',
-            'select-name',
-            'nested-interactive',
-            'aria-required-children',
-            'aria-required-parent',
+            'color-contrast',    // Theming system makes contrast checks unreliable in demo mode
+            'select-name',       // TODO(#11933): fix select labels, then remove
+            'nested-interactive', // TODO(#11933): fix nested interactive elements, then remove
+            'aria-required-children', // TODO(#11933): fix ARIA structure, then remove
+            'aria-required-parent',   // TODO(#11933): fix ARIA structure, then remove
           ])
           .exclude('[data-testid="chart"]') // Charts may have known issues
           .exclude('.recharts-wrapper') // Chart library exclusion

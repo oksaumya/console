@@ -159,15 +159,16 @@ export function useNightlyE2EData() {
   // case we already have good data — suppress the loading state.
   const hasCachedInitial = CACHED_INITIAL.guides.length > 0
 
+  const effectiveIsLoading = hasCachedInitial ? false : cacheResult.isLoading
+
   return {
     guides,
-    // Use the cache's own isDemoFallback which correctly handles:
-    // 1. Optimistic demo during cold-start loading (showOptimisticDemo)
-    // 2. Normal demo mode when disabled
-    // 3. demoWhenEmpty fallback after fetch returns empty
-    // Don't suppress during loading — demoWhenEmpty already handles this properly.
-    isDemoFallback: cacheResult.isDemoFallback || (!cacheResult.isLoading && isDemo),
-    isLoading: hasCachedInitial ? false : cacheResult.isLoading,
+    // Use effectiveIsLoading so isDemoFallback and isLoading are consistent:
+    // without this, consumers see isLoading=false but isDemoFallback was
+    // evaluated against cacheResult.isLoading=true, causing the demo badge
+    // to appear/disappear incorrectly during refreshes.
+    isDemoFallback: cacheResult.isDemoFallback || (!effectiveIsLoading && isDemo),
+    isLoading: effectiveIsLoading,
     isRefreshing: cacheResult.isRefreshing || (hasCachedInitial && cacheResult.isLoading),
     isFailed: cacheResult.isFailed,
     consecutiveFailures: cacheResult.consecutiveFailures,
