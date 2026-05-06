@@ -83,9 +83,10 @@ export default async (request: Request): Promise<Response> => {
       resp = await fetch(rawUrl, {
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
-      // Don't retry 4xx (client errors) — only transient 5xx
-      if (resp.ok || resp.status === 404 || resp.status < 500) break;
-      console.warn(`[missions-file] Upstream ${resp.status}, attempt ${attempt + 1}/${MAX_RETRIES + 1}`);
+      // Retry rate-limit 403s (x-ratelimit-remaining: 0) but not permission-denied 403s
+      const isRateLimited403 = resp.status === 403 && resp.headers.get("x-ratelimit-remaining") === "0"
+      if (resp.ok || resp.status === 404 || (resp.status < 500 && !isRateLimited403)) break;
+      console.warn(`[missions-file] Upstream ${resp.status}${isRateLimited403 ? " (rate-limited)" : ""}, attempt ${attempt + 1}/${MAX_RETRIES + 1}`);
     }
 
     if (!resp) {
