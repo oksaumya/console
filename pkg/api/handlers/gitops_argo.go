@@ -284,9 +284,15 @@ func (h *GitOpsHandlers) GetArgoHealthSummary(c *fiber.Ctx) error {
 		default:
 			key = "unknown"
 		}
-		if v, ok := summary[key].(int); ok {
-			summary[key] = v + 1
+		count := 0
+		if current, exists := summary[key]; exists {
+			if v, ok := current.(int); ok {
+				count = v
+			} else {
+				slog.Warn("[ArgoCD] unexpected counter type in health summary", "key", key, "type", fmt.Sprintf("%T", current))
+			}
 		}
+		summary[key] = count + 1
 	}
 
 	return c.JSON(fiber.Map{
@@ -333,9 +339,15 @@ func (h *GitOpsHandlers) GetArgoSyncSummary(c *fiber.Ctx) error {
 		default:
 			key = "unknown"
 		}
-		if v, ok := summary[key].(int); ok {
-			summary[key] = v + 1
+		count := 0
+		if current, exists := summary[key]; exists {
+			if v, ok := current.(int); ok {
+				count = v
+			} else {
+				slog.Warn("[ArgoCD] unexpected counter type in sync summary", "key", key, "type", fmt.Sprintf("%T", current))
+			}
 		}
+		summary[key] = count + 1
 	}
 
 	return c.JSON(fiber.Map{
