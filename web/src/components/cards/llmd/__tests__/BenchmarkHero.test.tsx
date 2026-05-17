@@ -34,8 +34,8 @@ vi.mock('react-i18next', () => ({
 }))
 
 vi.mock('../../CardDataContext', () => ({
-  useReportCardDataState: () => ({ data: [], isLoading: false, error: null }),
-  useReportCardDataState: () => {},
+  useReportCardDataState: vi.fn(),
+  useCardLoadingState: vi.fn(),
 }))
 
 vi.mock('../../../../hooks/useBenchmarkData', () => ({
